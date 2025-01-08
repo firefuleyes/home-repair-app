@@ -3,20 +3,26 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
 
-app = Flask(__name__, static_folder='static', template_folder='templates')
+app = Flask(__name__)
 
 # 配置數據庫
-if os.environ.get('RENDER'):
-    # Render.com 環境
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', '').replace('postgres://', 'postgresql://')
-else:
-    # 本地開發環境
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///repair.db'
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
+    DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://')
 
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL or 'sqlite:///repair.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-12345')
 
 db = SQLAlchemy(app)
+
+# 創建數據庫表
+with app.app_context():
+    try:
+        db.create_all()
+        print("Database tables created successfully")
+    except Exception as e:
+        print(f"Error creating database tables: {str(e)}")
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -128,10 +134,4 @@ def list_requests():
     return render_template('requests.html', requests=requests)
 
 if __name__ == '__main__':
-    with app.app_context():
-        try:
-            db.create_all()
-            print("Database tables created successfully")
-        except Exception as e:
-            print(f"Error creating database tables: {str(e)}")
     app.run(debug=True, host='0.0.0.0')
