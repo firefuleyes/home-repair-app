@@ -69,19 +69,21 @@ def register():
 @app.route('/create-request', methods=['GET', 'POST'])
 def create_request():
     if request.method == 'POST':
-        data = request.form
-        new_request = RepairRequest(
-            title=data['title'],
-            description=data['description'],
-            location=data['location'],
-            category=data['category']
-        )
-        db.session.add(new_request)
         try:
+            data = request.form
+            new_request = RepairRequest(
+                title=data['title'],
+                description=data['description'],
+                location=data['location'],
+                category=data['category'],
+                status='pending'
+            )
+            db.session.add(new_request)
             db.session.commit()
             return jsonify({'success': True})
-        except:
+        except Exception as e:
             db.session.rollback()
+            print(f"Error creating request: {str(e)}")
             return jsonify({'success': False, 'message': '創建需求失敗'})
     return render_template('create_request.html')
 
@@ -92,5 +94,9 @@ def list_requests():
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()
-    app.run(debug=True)
+        try:
+            db.create_all()
+            print("Database tables created successfully")
+        except Exception as e:
+            print(f"Error creating database tables: {str(e)}")
+    app.run(debug=True, host='0.0.0.0')
