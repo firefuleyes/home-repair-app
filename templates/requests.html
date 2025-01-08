@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2 class="mb-4">維修需求列表</h2>
+        <div class="row">
+            {% for request in requests %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ request.title }}</h5>
+                        <p class="card-text">{{ request.description }}</p>
+                        <div class="mb-2">
+                            <strong>地點：</strong> {{ request.location }}
+                        </div>
+                        <div class="mb-2">
+                            <strong>類別：</strong>
+                            <span class="badge bg-primary">
+                                {% if request.category == 'plumbing' %}
+                                    水電維修
+                                {% elif request.category == 'electrical' %}
+                                    電器維修
+                                {% elif request.category == 'carpentry' %}
+                                    木工維修
+                                {% elif request.category == 'painting' %}
+                                    油漆粉刷
+                                {% elif request.category == 'appliance' %}
+                                    家電維修
+                                {% else %}
+                                    其他
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>狀態：</strong>
+                            <span class="badge {% if request.status == 'pending' %}bg-warning{% elif request.status == 'accepted' %}bg-success{% else %}bg-secondary{% endif %}">
+                                {% if request.status == 'pending' %}
+                                    等待接單
+                                {% elif request.status == 'accepted' %}
+                                    已接單
+                                {% else %}
+                                    已完成
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>發布時間：</strong>
+                            {{ request.created_at.strftime('%Y-%m-%d %H:%M') }}
+                        </div>
+                        <button class="btn btn-primary" onclick="acceptRequest({{ request.id }})">
+                            接受需求
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+async function acceptRequest(requestId) {
+    if (!confirm('確定要接受這個維修需求嗎？')) {
+        return;
+    }
+    try {
+        const response = await fetch(`/accept-request/${requestId}`, {
+            method: 'POST'
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert('成功接受需求！');
+            location.reload();
+        } else {
+            alert(data.message || '接受需求失敗');
+        }
+    } catch (error) {
+        alert('接受需求時發生錯誤');
+    }
+}
+</script>
+{% endblock %}

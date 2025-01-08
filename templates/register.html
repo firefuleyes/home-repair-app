@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">註冊</h2>
+                <form id="registerForm">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">用戶名</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">密碼</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">電子郵件</label>
+                        <input type="email" class="form-control" id="email" name="email">
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">電話</label>
+                        <input type="tel" class="form-control" id="phone" name="phone">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="is_professional" name="is_professional">
+                        <label class="form-check-label" for="is_professional">我是維修師傅</label>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">註冊</button>
+                    </div>
+                </form>
+                <div class="text-center mt-3">
+                    <p>已有帳號？ <a href="/login">立即登入</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    try {
+        const response = await fetch('/register', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert('註冊成功！');
+            window.location.href = '/login';
+        } else {
+            alert(data.message || '註冊失敗');
+        }
+    } catch (error) {
+        alert('註冊時發生錯誤');
+    }
+});
+</script>
+{% endblock %}

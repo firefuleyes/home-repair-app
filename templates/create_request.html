@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">發布維修需求</h2>
+                <form id="createRequestForm">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">標題</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">詳細描述</label>
+                        <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="location" class="form-label">地點</label>
+                        <input type="text" class="form-control" id="location" name="location" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="category" class="form-label">維修類別</label>
+                        <select class="form-select" id="category" name="category" required>
+                            <option value="">選擇類別</option>
+                            <option value="plumbing">水電維修</option>
+                            <option value="electrical">電器維修</option>
+                            <option value="carpentry">木工維修</option>
+                            <option value="painting">油漆粉刷</option>
+                            <option value="appliance">家電維修</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">發布需求</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('createRequestForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    try {
+        const response = await fetch('/create-request', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert('需求發布成功！');
+            window.location.href = '/requests';
+        } else {
+            alert(data.message || '發布失敗');
+        }
+    } catch (error) {
+        alert('發布需求時發生錯誤');
+    }
+});
+</script>
+{% endblock %}

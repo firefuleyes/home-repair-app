@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3 text-center">
+        <h1 class="display-4 mb-4">歡迎使用房屋修繕服務平台</h1>
+        <p class="lead mb-4">找到專業的維修師傅，解決您的房屋問題</p>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">我需要維修服務</h5>
+                        <p class="card-text">發布您的維修需求，讓專業師傅為您服務</p>
+                        <a href="/create-request" class="btn btn-primary">發布需求</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">我是維修師傅</h5>
+                        <p class="card-text">瀏覽維修需求，接單賺取收入</p>
+                        <a href="/requests" class="btn btn-primary">查看需求</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
