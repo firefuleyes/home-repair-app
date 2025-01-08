@@ -43,21 +43,33 @@
 <script>
 document.getElementById('createRequestForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    
     const formData = new FormData(e.target);
+    const data = {};
+    formData.forEach((value, key) => {
+        data[key] = value;
+    });
+
     try {
         const response = await fetch('/create-request', {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
         });
-        const data = await response.json();
-        if (data.success) {
+        
+        const result = await response.json();
+        
+        if (result.success) {
             alert('需求發布成功！');
             window.location.href = '/requests';
         } else {
-            alert(data.message || '發布失敗');
+            alert(result.message || '發布失敗，請稍後再試');
         }
     } catch (error) {
-        alert('發布需求時發生錯誤');
+        console.error('Error:', error);
+        alert('發布需求時發生錯誤，請稍後再試');
     }
 });
 </script>

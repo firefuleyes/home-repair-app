@@ -4,9 +4,17 @@ from datetime import datetime
 import os
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///repair.db'
+
+# 配置數據庫
+if os.environ.get('RENDER'):
+    # Render.com 環境
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', '').replace('postgres://', 'postgresql://')
+else:
+    # 本地開發環境
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///repair.db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'your-secret-key'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key')
 
 db = SQLAlchemy(app)
 
@@ -70,21 +78,28 @@ def register():
 def create_request():
     if request.method == 'POST':
         try:
-            data = request.form
+            data = request.get_json()
+            print("Received data:", data)  # 調試日誌
+            
             new_request = RepairRequest(
                 title=data['title'],
                 description=data['description'],
                 location=data['location'],
                 category=data['category'],
-                status='pending'
+                status='pending',
+                created_at=datetime.utcnow()
             )
+            
             db.session.add(new_request)
             db.session.commit()
+            print("Request created successfully")  # 調試日誌
             return jsonify({'success': True})
+            
         except Exception as e:
             db.session.rollback()
-            print(f"Error creating request: {str(e)}")
-            return jsonify({'success': False, 'message': '創建需求失敗'})
+            print(f"Error creating request: {str(e)}")  # 調試日誌
+            return jsonify({'success': False, 'message': f'創建需求失敗: {str(e)}'})
+    
     return render_template('create_request.html')
 
 @app.route('/requests')
