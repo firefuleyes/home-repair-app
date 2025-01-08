@@ -102,6 +102,26 @@ def create_request():
     
     return render_template('create_request.html')
 
+@app.route('/accept-request/<int:request_id>', methods=['POST'])
+def accept_request(request_id):
+    try:
+        repair_request = RepairRequest.query.get(request_id)
+        if not repair_request:
+            return jsonify({'success': False, 'message': '找不到此維修需求'})
+            
+        if repair_request.status != 'pending':
+            return jsonify({'success': False, 'message': '此需求已被接受或已完成'})
+            
+        repair_request.status = 'accepted'
+        db.session.commit()
+        
+        return jsonify({'success': True})
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error accepting request: {str(e)}")
+        return jsonify({'success': False, 'message': f'接受需求失敗: {str(e)}'})
+
 @app.route('/requests')
 def list_requests():
     requests = RepairRequest.query.order_by(RepairRequest.created_at.desc()).all()

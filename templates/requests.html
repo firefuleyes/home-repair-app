@@ -48,9 +48,11 @@
                             <strong>發布時間：</strong>
                             {{ request.created_at.strftime('%Y-%m-%d %H:%M') }}
                         </div>
-                        <button class="btn btn-primary" onclick="acceptRequest({{ request.id }})">
-                            接受需求
-                        </button>
+                        {% if request.status == 'pending' %}
+                            <button class="btn btn-primary accept-btn" data-request-id="{{ request.id }}">
+                                接受需求
+                            </button>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -60,24 +62,29 @@
 </div>
 
 <script>
-async function acceptRequest(requestId) {
-    if (!confirm('確定要接受這個維修需求嗎？')) {
-        return;
-    }
-    try {
-        const response = await fetch(`/accept-request/${requestId}`, {
-            method: 'POST'
-        });
-        const data = await response.json();
-        if (data.success) {
-            alert('成功接受需求！');
-            location.reload();
-        } else {
-            alert(data.message || '接受需求失敗');
+document.querySelectorAll('.accept-btn').forEach(button => {
+    button.addEventListener('click', async (e) => {
+        const requestId = e.target.dataset.requestId;
+        try {
+            const response = await fetch(`/accept-request/${requestId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                // 自動重新加載頁面
+                location.reload();
+            } else {
+                alert(result.message || '接受需求失敗');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('接受需求時發生錯誤');
         }
-    } catch (error) {
-        alert('接受需求時發生錯誤');
-    }
-}
+    });
+});
 </script>
 {% endblock %}
